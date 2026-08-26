@@ -62,8 +62,8 @@ TRANSLATIONS: dict[str, dict] = {
             "result_ready": "✅ Готово: {count} × «{preset}» — скопируй ниже",
             "preview_label": "Твой невидимый ник (выглядит пустым, но содержит символ):",
             "copy_button_label": "📋 Копировать невидимый ник",
-            "copied_label": "✅ Скопировано",
-            "failed_label": "⚠️ Не удалось",
+            "copied_toast": "✅ Скопировано в буфер обмена!",
+            "failed_toast": "⚠️ Не удалось скопировать — выдели и скопируй символ вручную.",
             "how_to_header": "Как использовать",
             "how_to_markdown": """
 1. Нажми **«Копировать невидимый ник»** выше.
@@ -129,8 +129,8 @@ TRANSLATIONS: dict[str, dict] = {
             "result_ready": "✅ Ready: {count} × “{preset}” — copy it below",
             "preview_label": "Your invisible nickname (looks empty, but contains a character):",
             "copy_button_label": "📋 Copy invisible nickname",
-            "copied_label": "✅ Copied",
-            "failed_label": "⚠️ Failed",
+            "copied_toast": "✅ Copied to clipboard!",
+            "failed_toast": "⚠️ Couldn't copy — select and copy the character manually.",
             "how_to_header": "How to use it",
             "how_to_markdown": """
 1. Click **"Copy invisible nickname"** above.

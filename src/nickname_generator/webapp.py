@@ -10,7 +10,8 @@ from __future__ import annotations
 import streamlit as st
 import streamlit.components.v1 as components
 
-from .clipboard import build_copy_list_html, build_single_copy_html
+from .clipboard import build_copy_list_html
+from .copy_component import copy_button
 from .data import INVISIBLE_CHAR_ORDER, INVISIBLE_CHARS
 from .generator import generate_nicknames
 from .translations import STYLE_ORDER, TRANSLATIONS
@@ -113,13 +114,23 @@ def run_app(lang: str) -> None:
         st.success(inv["result_ready"].format(count=repeat, preset=preset_choice))
 
         st.write(inv["preview_label"])
-        single_html, single_height = build_single_copy_html(
+        st.code(invisible_nickname, language=None)
+
+        # Реальная кнопка копирования: клик всегда выполняет фактическое
+        # действие (запись в буфер обмена) и сообщает результат в Python,
+        # после чего показывается настоящий st.toast(...).
+        copy_result = copy_button(
             invisible_nickname,
             label=inv["copy_button_label"],
-            copied_label=inv["copied_label"],
-            failed_label=inv["failed_label"],
+            key=f"invisible_copy_{lang}",
         )
-        components.html(single_html, height=single_height, scrolling=False)
+        toast_ts_key = f"invisible_copy_toast_ts_{lang}"
+        if copy_result is not None and copy_result["ts"] != st.session_state.get(toast_ts_key):
+            st.session_state[toast_ts_key] = copy_result["ts"]
+            if copy_result["ok"]:
+                st.toast(inv["copied_toast"], icon="📋")
+            else:
+                st.toast(inv["failed_toast"], icon="⚠️")
 
         with st.expander(inv["how_to_header"]):
             st.markdown(inv["how_to_markdown"])

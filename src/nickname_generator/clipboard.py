@@ -1,8 +1,13 @@
-"""HTML/JS-компонент для кнопок «Копировать» внутри Streamlit.
+"""Одностороннее HTML/JS-отображение списка ников с кнопками «Копировать».
 
-Тексты статусов копирования (успех/ошибка) параметризуемы, чтобы этот
-компонент можно было переиспользовать в локализованных версиях приложения
-(см. `nickname_generator.webapp`).
+Используется для вкладки-генератора (список из N ников). Копирование
+выполняется полностью на стороне JS внутри iframe — сюда не передаётся
+результат клика обратно в Python, поэтому подтверждение об успехе тоже
+рисуется прямо в этом же HTML (см. `.copy-banner`).
+
+Для вкладки «Невидимый ник» (один элемент, но с требованием настоящего
+`st.toast()` по результату клика) используется другой, двунаправленный
+компонент — `nickname_generator.copy_component`.
 """
 
 from __future__ import annotations
@@ -158,14 +163,3 @@ def build_copy_list_html(
     document = f"{_STYLE}<div>{rows}</div>{_script(copied_label, failed_label)}"
     height = _BASE_HEIGHT + ROW_HEIGHT * max(len(items), 1)
     return document, height
-
-
-def build_single_copy_html(
-    text: str,
-    label: str = "📋 Копировать",
-    copied_label: str = "✅ Скопировано",
-    failed_label: str = "⚠️ Не удалось",
-) -> tuple[str, int]:
-    """Строит компактный HTML-блок с одним ником и кнопкой копирования."""
-    document = f"{_STYLE}<div>{_row_html(text, label)}</div>{_script(copied_label, failed_label)}"
-    return document, _BASE_HEIGHT + ROW_HEIGHT
