@@ -1,4 +1,9 @@
-"""HTML/JS-компонент для кнопок «Копировать» внутри Streamlit."""
+"""HTML/JS-компонент для кнопок «Копировать» внутри Streamlit.
+
+Тексты статусов копирования (успех/ошибка) параметризуемы, чтобы этот
+компонент можно было переиспользовать в локализованных версиях приложения
+(см. `nickname_generator.webapp`).
+"""
 
 from __future__ import annotations
 
@@ -62,28 +67,30 @@ _STYLE = """
 </style>
 """
 
-_SCRIPT = """
+
+def _script(copied_label: str, failed_label: str) -> str:
+    return f"""
 <script>
-  function copyNickname(btn, text) {
-    const finish = (ok) => {
+  function copyNickname(btn, text) {{
+    const finish = (ok) => {{
       const original = btn.dataset.label;
-      btn.textContent = ok ? "✅ Скопировано" : "⚠️ Не удалось";
+      btn.textContent = ok ? {json.dumps(copied_label)} : {json.dumps(failed_label)};
       btn.classList.toggle("copied", ok);
-      setTimeout(() => {
+      setTimeout(() => {{
         btn.textContent = original;
         btn.classList.remove("copied");
-      }, 1500);
-    };
+      }}, 1500);
+    }};
 
-    if (navigator.clipboard && window.isSecureContext) {
+    if (navigator.clipboard && window.isSecureContext) {{
       navigator.clipboard.writeText(text).then(() => finish(true)).catch(() => fallbackCopy(text, finish));
-    } else {
+    }} else {{
       fallbackCopy(text, finish);
-    }
-  }
+    }}
+  }}
 
-  function fallbackCopy(text, finish) {
-    try {
+  function fallbackCopy(text, finish) {{
+    try {{
       const area = document.createElement("textarea");
       area.value = text;
       area.style.position = "fixed";
@@ -94,15 +101,15 @@ _SCRIPT = """
       const ok = document.execCommand("copy");
       document.body.removeChild(area);
       finish(ok);
-    } catch (err) {
+    }} catch (err) {{
       finish(false);
-    }
-  }
+    }}
+  }}
 </script>
 """
 
 
-def _row_html(text: str, label: str = "📋 Копировать") -> str:
+def _row_html(text: str, label: str) -> str:
     escaped_display = html.escape(text)
     js_text = json.dumps(text)
     return f"""
@@ -114,18 +121,28 @@ def _row_html(text: str, label: str = "📋 Копировать") -> str:
     """
 
 
-def build_copy_list_html(items: list[str]) -> tuple[str, int]:
+def build_copy_list_html(
+    items: list[str],
+    label: str = "📋 Копировать",
+    copied_label: str = "✅ Скопировано",
+    failed_label: str = "⚠️ Не удалось",
+) -> tuple[str, int]:
     """Строит один HTML-блок со списком ников и кнопками копирования.
 
     Возвращает (html, height) — height подходит для components.html().
     """
-    rows = "\n".join(_row_html(item) for item in items)
-    document = f"{_STYLE}<div>{rows}</div>{_SCRIPT}"
+    rows = "\n".join(_row_html(item, label) for item in items)
+    document = f"{_STYLE}<div>{rows}</div>{_script(copied_label, failed_label)}"
     height = _BASE_HEIGHT + ROW_HEIGHT * max(len(items), 1)
     return document, height
 
 
-def build_single_copy_html(text: str, label: str = "📋 Копировать") -> tuple[str, int]:
+def build_single_copy_html(
+    text: str,
+    label: str = "📋 Копировать",
+    copied_label: str = "✅ Скопировано",
+    failed_label: str = "⚠️ Не удалось",
+) -> tuple[str, int]:
     """Строит компактный HTML-блок с одним ником и кнопкой копирования."""
-    document = f"{_STYLE}<div>{_row_html(text, label)}</div>{_SCRIPT}"
+    document = f"{_STYLE}<div>{_row_html(text, label)}</div>{_script(copied_label, failed_label)}"
     return document, _BASE_HEIGHT + ROW_HEIGHT
