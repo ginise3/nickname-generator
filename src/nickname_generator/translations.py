@@ -18,7 +18,6 @@ TRANSLATIONS: dict[str, dict] = {
         "page_icon": "🎮",
         "title": "🎮 Генератор ников",
         "caption": "Придумай уникальный ник для игр, соцсетей и не только",
-        "tab_generator": "🎲 Генератор ников",
         "sidebar": {
             "header": "Настройки",
             "base_word_label": "Слово или имя для основы ника (необязательно)",
@@ -48,7 +47,6 @@ TRANSLATIONS: dict[str, dict] = {
         "page_icon": "🎮",
         "title": "🎮 Nickname Generator",
         "caption": "Create a unique nickname for games, social media and beyond",
-        "tab_generator": "🎲 Nickname Generator",
         "sidebar": {
             "header": "Settings",
             "base_word_label": "Base word or name (optional)",
