@@ -11,8 +11,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from .clipboard import build_copy_list_html
-from .copy_component import copy_button
-from .data import INVISIBLE_CHAR_ORDER, INVISIBLE_CHARS
 from .generator import generate_nicknames
 from .translations import STYLE_ORDER, TRANSLATIONS
 
@@ -29,10 +27,6 @@ def run_app(lang: str) -> None:
 
     st.title(t["title"])
     st.caption(t["caption"])
-
-    tab_generator, tab_invisible = st.tabs([t["tab_generator"], t["tab_invisible"]])
-
-    # --- Вкладка 1: обычный генератор -------------------------------------
 
     sb = t["sidebar"]
     with st.sidebar:
@@ -67,70 +61,16 @@ def run_app(lang: str) -> None:
         )
 
     res = t["results"]
-    with tab_generator:
-        nicknames = st.session_state[state_key]
-        if nicknames:
-            st.subheader(res["subheader"])
-            st.caption(res["copy_hint"])
-            list_html, list_height = build_copy_list_html(
-                nicknames,
-                label=res["copy_button_label"],
-                copied_label=res["copied_label"],
-                failed_label=res["failed_label"],
-            )
-            components.html(list_html, height=list_height, scrolling=False)
-        else:
-            st.info(res["empty_info"])
-
-    # --- Вкладка 2: невидимый ник ------------------------------------------
-
-    inv = t["invisible"]
-    with tab_invisible:
-        st.subheader(inv["subheader"])
-        st.write(inv["description"])
-
-        preset_labels = {inv["presets"][key]: key for key in INVISIBLE_CHAR_ORDER}
-        preset_choice = st.selectbox(inv["preset_label"], list(preset_labels.keys()))
-        preset_key = preset_labels[preset_choice]
-        invisible_char = INVISIBLE_CHARS[preset_key]
-
-        repeat = st.slider(
-            inv["repeat_label"],
-            min_value=1,
-            max_value=6,
-            value=1,
-            help=inv["repeat_help"],
+    nicknames = st.session_state[state_key]
+    if nicknames:
+        st.subheader(res["subheader"])
+        st.caption(res["copy_hint"])
+        list_html, list_height = build_copy_list_html(
+            nicknames,
+            label=res["copy_button_label"],
+            copied_label=res["copied_label"],
+            failed_label=res["failed_label"],
         )
-        invisible_nickname = invisible_char * repeat
-
-        # Заметный сигнал о том, что результат только что пересчитался: тост при
-        # реальном изменении параметров + всегда видимый зелёный success-блок.
-        signature_key = f"invisible_signature_{lang}"
-        signature = (preset_key, repeat)
-        if signature_key in st.session_state and st.session_state[signature_key] != signature:
-            st.toast(inv["updated_toast"], icon="🔄")
-        st.session_state[signature_key] = signature
-
-        st.success(inv["result_ready"].format(count=repeat, preset=preset_choice))
-
-        st.write(inv["preview_label"])
-        st.code(invisible_nickname, language=None)
-
-        # Реальная кнопка копирования: клик всегда выполняет фактическое
-        # действие (запись в буфер обмена) и сообщает результат в Python,
-        # после чего показывается настоящий st.toast(...).
-        copy_result = copy_button(
-            invisible_nickname,
-            label=inv["copy_button_label"],
-            key=f"invisible_copy_{lang}",
-        )
-        toast_ts_key = f"invisible_copy_toast_ts_{lang}"
-        if copy_result is not None and copy_result["ts"] != st.session_state.get(toast_ts_key):
-            st.session_state[toast_ts_key] = copy_result["ts"]
-            if copy_result["ok"]:
-                st.toast(inv["copied_toast"], icon="📋")
-            else:
-                st.toast(inv["failed_toast"], icon="⚠️")
-
-        with st.expander(inv["how_to_header"]):
-            st.markdown(inv["how_to_markdown"])
+        components.html(list_html, height=list_height, scrolling=False)
+    else:
+        st.info(res["empty_info"])

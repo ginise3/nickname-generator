@@ -30,17 +30,3 @@ LEET_MAP = {
 
 SEPARATORS = ["", "_", "-", "."]
 
-# Unicode-символы, которые отображаются как пустота, но не являются обычным
-# пробелом — платформы вроде Discord/Telegram отклоняют ники из "настоящих"
-# пробелов, но принимают эти символы.
-# Ключи нейтральны (не привязаны к языку интерфейса) — подписи для UI берутся
-# из nickname_generator.translations.
-INVISIBLE_CHARS = {
-    "discord": "⠀",  # Braille Pattern Blank
-    "telegram": "ㅤ",  # Hangul Filler
-    "zwsp": "​",  # Zero-Width Space — удобен для комбинаций
-}
-
-# Порядок отображения пресетов в UI.
-INVISIBLE_CHAR_ORDER = ["discord", "telegram", "zwsp"]
-
