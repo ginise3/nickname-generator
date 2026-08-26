@@ -9,14 +9,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from nickname_generator import generate_nicknames
+from nickname_generator.clipboard import build_copy_list_html, build_single_copy_html
+from nickname_generator.data import INVISIBLE_CHARS
 from nickname_generator.generator import Style
 
 st.set_page_config(page_title="Генератор ников", page_icon="🎮", layout="centered")
 
 st.title("🎮 Генератор ников")
 st.caption("Придумай уникальный ник для игр, соцсетей и не только")
+
+tab_generator, tab_invisible = st.tabs(["🎲 Генератор ников", "👻 Невидимый ник"])
+
+# --- Вкладка 1: обычный генератор -------------------------------------------------
 
 with st.sidebar:
     st.header("Настройки")
@@ -52,9 +59,54 @@ if generate_clicked:
         use_leet=use_leet,
     )
 
-if st.session_state.nicknames:
-    st.subheader("Результат")
-    for nickname in st.session_state.nicknames:
-        st.code(nickname, language=None)
-else:
-    st.info("Настрой параметры слева и нажми «Сгенерировать».")
+with tab_generator:
+    if st.session_state.nicknames:
+        st.subheader("Результат")
+        st.caption("Нажми «Копировать» рядом с ником, чтобы скопировать его в буфер обмена.")
+        list_html, list_height = build_copy_list_html(st.session_state.nicknames)
+        components.html(list_html, height=list_height, scrolling=False)
+    else:
+        st.info("Настрой параметры слева и нажми «Сгенерировать».")
+
+# --- Вкладка 2: невидимый ник -------------------------------------------------
+
+with tab_invisible:
+    st.subheader("Невидимый ник")
+    st.write(
+        "Некоторые Unicode-символы выглядят как пустота, но не являются обычным "
+        "пробелом — Discord, Telegram и многие игры принимают их как имя, "
+        "хотя визуально ник кажется пустым."
+    )
+
+    preset_name = st.selectbox("Платформа / вариант символа", list(INVISIBLE_CHARS.keys()))
+    invisible_char = INVISIBLE_CHARS[preset_name]
+
+    repeat = st.slider(
+        "Сколько символов использовать",
+        min_value=1,
+        max_value=6,
+        value=1,
+        help="Некоторые платформы требуют минимум 2 символа для имени.",
+    )
+    invisible_nickname = invisible_char * repeat
+
+    st.write("Твой невидимый ник (выглядит пустым, но содержит символ):")
+    single_html, single_height = build_single_copy_html(invisible_nickname, "📋 Копировать невидимый ник")
+    components.html(single_html, height=single_height, scrolling=False)
+
+    with st.expander("Как использовать"):
+        st.markdown(
+            """
+1. Нажми **«Копировать невидимый ник»** выше.
+2. Открой настройки профиля/ника в Discord, Telegram или игре.
+3. Вставь скопированный символ в поле имени (`Ctrl+V` / `⌘+V`).
+4. Если платформа не принимает ник (пишет «имя пустое» или «слишком короткое»),
+   увеличь количество символов ползунком выше или попробуй другой вариант из списка —
+   разные платформы по-разному фильтруют "пустые" символы.
+5. Сохрани изменения.
+
+**Подсказка:** для Discord обычно лучше подходит *Braille Pattern Blank* (⠀),
+для Telegram — *Hangul Filler* (ㅤ). *Zero-Width Space* удобно комбинировать
+с другими символами, если нужен ник длиннее одного символа.
+            """
+        )

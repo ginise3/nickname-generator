@@ -29,3 +29,13 @@ LEET_MAP = {
 }
 
 SEPARATORS = ["", "_", "-", "."]
+
+# Unicode-символы, которые отображаются как пустота, но не являются обычным
+# пробелом — платформы вроде Discord/Telegram отклоняют ники из "настоящих"
+# пробелов, но принимают эти символы.
+INVISIBLE_CHARS = {
+    "Discord (Braille Pattern Blank)": "⠀",
+    "Telegram (Hangul Filler)": "ㅤ",
+    "Zero-Width Space (для комбинаций)": "​",
+}
+
