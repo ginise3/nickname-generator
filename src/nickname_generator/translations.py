@@ -35,11 +35,11 @@ TRANSLATIONS: dict[str, dict] = {
         },
         "results": {
             "subheader": "Результат",
-            "copy_hint": "Нажми «Копировать» рядом с ником, чтобы скопировать его в буфер обмена.",
+            "copy_hint": (
+                "Наведи курсор на ник и нажми на иконку 📋 в правом верхнем "
+                "углу, чтобы скопировать его в буфер обмена."
+            ),
             "empty_info": "Настрой параметры слева и нажми «Сгенерировать».",
-            "copy_button_label": "📋 Копировать",
-            "copied_label": "✅ Скопировано",
-            "failed_label": "⚠️ Не удалось",
         },
     },
     "en": {
@@ -64,11 +64,11 @@ TRANSLATIONS: dict[str, dict] = {
         },
         "results": {
             "subheader": "Results",
-            "copy_hint": "Click “Copy” next to a nickname to copy it to your clipboard.",
+            "copy_hint": (
+                "Hover over a nickname and click the 📋 icon in its top-right "
+                "corner to copy it to your clipboard."
+            ),
             "empty_info": "Adjust the settings on the left and click “Generate”.",
-            "copy_button_label": "📋 Copy",
-            "copied_label": "✅ Copied",
-            "failed_label": "⚠️ Failed",
         },
     },
 }

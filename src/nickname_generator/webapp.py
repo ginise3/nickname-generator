@@ -8,9 +8,7 @@
 from __future__ import annotations
 
 import streamlit as st
-import streamlit.components.v1 as components
 
-from .clipboard import build_copy_list_html
 from .generator import generate_nicknames
 from .translations import STYLE_ORDER, TRANSLATIONS
 
@@ -65,12 +63,12 @@ def run_app(lang: str) -> None:
     if nicknames:
         st.subheader(res["subheader"])
         st.caption(res["copy_hint"])
-        list_html, list_height = build_copy_list_html(
-            nicknames,
-            label=res["copy_button_label"],
-            copied_label=res["copied_label"],
-            failed_label=res["failed_label"],
-        )
-        components.html(list_html, height=list_height, scrolling=False)
+        # st.code() рисует нативный блок с собственной кнопкой копирования
+        # (иконка в правом верхнем углу при наведении) — это встроенный
+        # механизм Streamlit, который выполняется в основном окне страницы,
+        # а не в изолированном iframe, поэтому его не блокирует политика
+        # безопасности браузера в отношении Clipboard API.
+        for nickname in nicknames:
+            st.code(nickname, language=None)
     else:
         st.info(res["empty_info"])
