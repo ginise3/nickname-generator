@@ -27,6 +27,7 @@ _STYLE = """
     body { color: #fafafa; }
   }
   .nick-row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -56,10 +57,27 @@ _STYLE = """
     white-space: nowrap;
   }
   .copy-btn:hover { background: rgba(120, 120, 120, 0.22); }
-  .copy-btn.copied {
-    border-color: rgba(46, 160, 67, 0.6);
-    color: #2ea043;
+  /* Заметное подтверждение результата копирования — перекрывает всю строку,
+     поэтому не требует пересчёта высоты iframe-компонента. */
+  .copy-banner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #ffffff;
+    background: #21a545;
+    opacity: 0;
+    transform: translateY(-2px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
   }
+  .copy-banner.show { opacity: 1; transform: translateY(0); }
+  .copy-banner.error { background: #d93025; }
   @media (max-width: 420px) {
     .nick-text { flex-basis: 100%; }
     .copy-btn { flex: 1 1 auto; }
@@ -72,14 +90,18 @@ def _script(copied_label: str, failed_label: str) -> str:
     return f"""
 <script>
   function copyNickname(btn, text) {{
+    const row = btn.closest(".nick-row");
+    const banner = row ? row.querySelector(".copy-banner") : null;
+
     const finish = (ok) => {{
-      const original = btn.dataset.label;
-      btn.textContent = ok ? {json.dumps(copied_label)} : {json.dumps(failed_label)};
-      btn.classList.toggle("copied", ok);
-      setTimeout(() => {{
-        btn.textContent = original;
-        btn.classList.remove("copied");
-      }}, 1500);
+      if (!banner) return;
+      banner.textContent = ok ? {json.dumps(copied_label)} : {json.dumps(failed_label)};
+      banner.classList.toggle("error", !ok);
+      banner.classList.add("show");
+      clearTimeout(banner._hideTimer);
+      banner._hideTimer = setTimeout(() => {{
+        banner.classList.remove("show", "error");
+      }}, 1800);
     }};
 
     if (navigator.clipboard && window.isSecureContext) {{
@@ -117,6 +139,7 @@ def _row_html(text: str, label: str) -> str:
       <code class="nick-text">{escaped_display}</code>
       <button class="copy-btn" data-label="{html.escape(label)}"
               onclick="copyNickname(this, {js_text})">{html.escape(label)}</button>
+      <div class="copy-banner" role="status" aria-live="polite"></div>
     </div>
     """
 

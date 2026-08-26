@@ -90,7 +90,8 @@ def run_app(lang: str) -> None:
 
         preset_labels = {inv["presets"][key]: key for key in INVISIBLE_CHAR_ORDER}
         preset_choice = st.selectbox(inv["preset_label"], list(preset_labels.keys()))
-        invisible_char = INVISIBLE_CHARS[preset_labels[preset_choice]]
+        preset_key = preset_labels[preset_choice]
+        invisible_char = INVISIBLE_CHARS[preset_key]
 
         repeat = st.slider(
             inv["repeat_label"],
@@ -100,6 +101,16 @@ def run_app(lang: str) -> None:
             help=inv["repeat_help"],
         )
         invisible_nickname = invisible_char * repeat
+
+        # Заметный сигнал о том, что результат только что пересчитался: тост при
+        # реальном изменении параметров + всегда видимый зелёный success-блок.
+        signature_key = f"invisible_signature_{lang}"
+        signature = (preset_key, repeat)
+        if signature_key in st.session_state and st.session_state[signature_key] != signature:
+            st.toast(inv["updated_toast"], icon="🔄")
+        st.session_state[signature_key] = signature
+
+        st.success(inv["result_ready"].format(count=repeat, preset=preset_choice))
 
         st.write(inv["preview_label"])
         single_html, single_height = build_single_copy_html(
