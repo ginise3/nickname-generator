@@ -36,8 +36,8 @@ TRANSLATIONS: dict[str, dict] = {
         "results": {
             "subheader": "Результат",
             "copy_hint": (
-                "Наведи курсор на ник и нажми на иконку 📋 в правом верхнем "
-                "углу, чтобы скопировать его в буфер обмена."
+                "Нажми на иконку 📋 в правом верхнем углу ника, чтобы "
+                "скопировать его в буфер обмена."
             ),
             "empty_info": "Настрой параметры слева и нажми «Сгенерировать».",
         },
@@ -65,8 +65,8 @@ TRANSLATIONS: dict[str, dict] = {
         "results": {
             "subheader": "Results",
             "copy_hint": (
-                "Hover over a nickname and click the 📋 icon in its top-right "
-                "corner to copy it to your clipboard."
+                "Click the 📋 icon in a nickname's top-right corner to copy "
+                "it to your clipboard."
             ),
             "empty_info": "Adjust the settings on the left and click “Generate”.",
         },

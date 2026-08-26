@@ -12,6 +12,44 @@ import streamlit as st
 from .generator import generate_nicknames
 from .translations import STYLE_ORDER, TRANSLATIONS
 
+# Кнопка/иконка копирования у st.code() встроена в Streamlit и по умолчанию
+# показывается только при наведении курсора (opacity переключается на hover,
+# CSS-классом или инлайн-стилем — в зависимости от версии). Раз ников в
+# списке несколько и на мобильных устройствах наведения вообще нет, делаем
+# её видимой всегда: переопределяем opacity/visibility с !important — это
+# бьёт как CSS-правило Streamlit, так и возможный инлайн-стиль на hover.
+# Заодно увеличиваем саму иконку (по умолчанию она мелкая) — масштабируем
+# кнопку через transform, чтобы не ломать раскладку соседних элементов
+# тулбара, и от правого верхнего угла (transform-origin), чтобы увеличенная
+# иконка не съезжала за пределы блока кода.
+# Селекторы намеренно избыточны (data-testid у разных версий Streamlit
+# отличается: `stCode` — контейнер блока кода, `stElementToolbar*` — сама
+# всплывающая панель с кнопкой) и ограничены только блоками `st.code()`,
+# чтобы не трогать тулбары других виджетов (графиков, таблиц и т.д.).
+_ALWAYS_SHOW_COPY_BUTTON_CSS = """
+<style>
+  div[data-testid="stCode"] [data-testid="stElementToolbar"],
+  div[data-testid="stCode"] [data-testid="stElementToolbarButton"],
+  div[data-testid="stCode"] [data-testid="stElementToolbarButtonContainer"],
+  div[data-testid="stCode"] [data-testid="stElementToolbarButtonIcon"],
+  div[data-testid="stCode"] button,
+  div[data-testid="stCode"] [role="button"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  div[data-testid="stCode"] [data-testid="stElementToolbarButton"],
+  div[data-testid="stCode"] button {
+    transform: scale(1.6);
+    transform-origin: top right;
+  }
+  div[data-testid="stCode"] [data-testid="stElementToolbarButtonIcon"] svg {
+    width: 1.3em !important;
+    height: 1.3em !important;
+  }
+</style>
+"""
+
 
 def run_app(lang: str) -> None:
     """Рисует полное Streamlit-приложение на выбранном языке.
@@ -22,6 +60,7 @@ def run_app(lang: str) -> None:
     t = TRANSLATIONS[lang]
 
     st.set_page_config(page_title=t["page_title"], page_icon=t["page_icon"], layout="centered")
+    st.markdown(_ALWAYS_SHOW_COPY_BUTTON_CSS, unsafe_allow_html=True)
 
     st.title(t["title"])
     st.caption(t["caption"])
@@ -64,10 +103,11 @@ def run_app(lang: str) -> None:
         st.subheader(res["subheader"])
         st.caption(res["copy_hint"])
         # st.code() рисует нативный блок с собственной кнопкой копирования
-        # (иконка в правом верхнем углу при наведении) — это встроенный
-        # механизм Streamlit, который выполняется в основном окне страницы,
-        # а не в изолированном iframe, поэтому его не блокирует политика
-        # безопасности браузера в отношении Clipboard API.
+        # в правом верхнем углу (всегда видимой — см. _ALWAYS_SHOW_COPY_-
+        # BUTTON_CSS выше) — это встроенный механизм Streamlit, который
+        # выполняется в основном окне страницы, а не в изолированном iframe,
+        # поэтому его не блокирует политика безопасности браузера в
+        # отношении Clipboard API.
         for nickname in nicknames:
             st.code(nickname, language=None)
     else:
