@@ -13,21 +13,22 @@ from .generator import generate_nicknames
 from .translations import STYLE_ORDER, TRANSLATIONS
 
 # Кнопка/иконка копирования у st.code() встроена в Streamlit и по умолчанию
-# показывается только при наведении курсора (opacity переключается на hover,
-# CSS-классом или инлайн-стилем — в зависимости от версии). Раз ников в
-# списке несколько и на мобильных устройствах наведения вообще нет, делаем
-# её видимой всегда: переопределяем opacity/visibility с !important — это
-# бьёт как CSS-правило Streamlit, так и возможный инлайн-стиль на hover.
-# Заодно увеличиваем саму иконку (по умолчанию она мелкая) — масштабируем
-# кнопку через transform, чтобы не ломать раскладку соседних элементов
-# тулбара, и от правого верхнего угла (transform-origin), чтобы увеличенная
-# иконка не съезжала за пределы блока кода.
-# Селекторы намеренно избыточны (data-testid у разных версий Streamlit
-# отличается: `stCode` — контейнер блока кода, `stElementToolbar*` — сама
-# всплывающая панель с кнопкой) и ограничены только блоками `st.code()`,
-# чтобы не трогать тулбары других виджетов (графиков, таблиц и т.д.).
+# показывается только при наведении курсора. Проверено вживую (Playwright,
+# сгенерированный DOM реального Streamlit-приложения): переключается это НЕ
+# на самой кнопке и не через её собственный data-testid, а на безымянных
+# обёрточных <div> без data-testid между `stCode` и
+# `stElementToolbarButton` (opacity: 0; visibility: hidden), у которых
+# нестабильные, привязанные к сборке имена классов (`st-emotion-cache-*`) —
+# поэтому таргетить их по классу ненадёжно между версиями Streamlit.
+# Вместо этого используем :has() — выбираем любой div внутри `stCode`,
+# СОДЕРЖАЩИЙ `stElementToolbarButton`, независимо от его класса, и снимаем
+# opacity/visibility заодно с самой кнопкой и иконкой (с !important, чтобы
+# перебить исходное правило Streamlit). Размер иконки не трогаем — остаётся
+# нативным. Селекторы ограничены только блоками `st.code()`, чтобы не
+# затронуть тулбары других виджетов (графиков, таблиц и т.д.).
 _ALWAYS_SHOW_COPY_BUTTON_CSS = """
 <style>
+  div[data-testid="stCode"] div:has([data-testid="stElementToolbarButton"]),
   div[data-testid="stCode"] [data-testid="stElementToolbar"],
   div[data-testid="stCode"] [data-testid="stElementToolbarButton"],
   div[data-testid="stCode"] [data-testid="stElementToolbarButtonContainer"],
@@ -37,15 +38,6 @@ _ALWAYS_SHOW_COPY_BUTTON_CSS = """
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-  }
-  div[data-testid="stCode"] [data-testid="stElementToolbarButton"],
-  div[data-testid="stCode"] button {
-    transform: scale(1.6);
-    transform-origin: top right;
-  }
-  div[data-testid="stCode"] [data-testid="stElementToolbarButtonIcon"] svg {
-    width: 1.3em !important;
-    height: 1.3em !important;
   }
 </style>
 """
